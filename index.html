@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SismikPE — Calculadora de ROI y Ahorro · ETABS</title>
+    <meta name="description" content="Calcula el ahorro mensual y anual al automatizar la extracción de datos de ETABS con SismikPE. Cumplimiento RNE E.030 2026.">
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        navy: {
+                            50:  '#f0f4ff',
+                            100: '#e0e9ff',
+                            600: '#1e3a8a',
+                            800: '#0f2158',
+                            900: '#0B1120',
+                            950: '#070c18',
+                        },
+                        gold: {
+                            300: '#d4b483',
+                            400: '#c4a06a',
+                            500: '#B08D57',
+                            600: '#9a7a47',
+                        },
+                        ink: {
+                            50:  '#F8F9FB',
+                            100: '#F1F3F7',
+                            200: '#E2E8F0',
+                            400: '#94A3B8',
+                            500: '#64748B',
+                            700: '#334155',
+                            900: '#0F172A',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        .stat-divider {
+            border-top: 1px solid #E2E8F0;
+            margin-top: 1.25rem;
+            padding-top: 1.25rem;
+        }
+        .stat-divider-dark {
+            border-top: 1px solid rgba(255,255,255,0.08);
+            margin-top: 1.25rem;
+            padding-top: 1.25rem;
+        }
+
+        /* Input focus state */
+        .input-field:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.12);
+        }
+
+        /* Subtle card hover */
+        .metric-card {
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .metric-card:hover {
+            border-color: #CBD5E1;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        }
+
+        /* WhatsApp button pulse */
+        @keyframes wa-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.3); }
+            50%       { box-shadow: 0 0 0 8px rgba(37, 211, 102, 0); }
+        }
+        .wa-btn { animation: wa-pulse 2.5s ease-in-out infinite; }
+        .wa-btn:hover { animation: none; }
+    </style>
+</head>
+<body class="bg-ink-50 text-ink-900 antialiased">
+
+    <!-- ═══════════════════════════════════════
+         HEADER
+    ═══════════════════════════════════════ -->
+    <header class="bg-navy-900 text-white">
+        <!-- Top bar con logos -->
+        <div class="border-b border-white/8 py-4 px-6">
+            <div class="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-4">
+                <div class="flex items-center gap-6">
+                    <img src="SismikPE.png" alt="SismikPE" class="h-9 object-contain" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'text-white font-bold text-lg tracking-tight',textContent:'SismikPE'}))">
+                    <span class="text-white/20 text-xl font-light">×</span>
+                    <img src="etabs.png" alt="ETABS" class="h-7 object-contain opacity-80" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'text-white/60 font-semibold text-sm tracking-widest uppercase',textContent:'ETABS'}))">
+                </div>
+                <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-white/50">
+                    <svg class="w-3.5 h-3.5 text-gold-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                    RNE E.030 2026
+                </div>
+            </div>
+        </div>
+
+        <!-- Hero text -->
+        <div class="max-w-6xl mx-auto px-6 py-14">
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gold-400 mb-4">Calculadora de Impacto Financiero</p>
+            <h1 class="text-3xl md:text-5xl font-bold leading-tight text-white mb-4 max-w-3xl">
+                ¿Cuánto vale tu tiempo<br class="hidden md:block"> en ingeniería estructural?
+            </h1>
+            <p class="text-ink-400 text-base md:text-lg max-w-2xl font-normal leading-relaxed">
+                SismikPE automatiza la extracción de datos de ETABS. Ingresa tus datos y calcula el ahorro real en tiempo y dinero por proyecto, mes y año.
+            </p>
+        </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════
+         MAIN
+    ═══════════════════════════════════════ -->
+    <main class="max-w-6xl mx-auto px-4 py-10 pb-24">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- ─── Panel de Inputs ─── -->
+            <aside class="lg:col-span-4 self-start space-y-4">
+
+                <!-- Variables -->
+                <div class="bg-white border border-ink-200 rounded-xl p-6">
+                    <h2 class="text-sm font-semibold uppercase tracking-widest text-ink-500 mb-5">Tus Variables</h2>
+
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-medium text-ink-700 mb-1.5" for="pisos">Número de pisos promedio</label>
+                            <div class="relative">
+                                <input type="number" id="pisos" value="10" min="1" step="1" inputmode="numeric"
+                                    class="input-field w-full pl-4 pr-14 py-3 bg-ink-50 border border-ink-200 rounded-lg text-lg font-semibold text-ink-900 transition-all">
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-ink-400 font-medium pointer-events-none">pisos</span>
+                            </div>
+                            <p class="text-xs text-ink-400 mt-1.5">Define la complejidad del modelo estructural.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-ink-700 mb-1.5" for="tarifa">Tarifa por hora de ingeniería</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-ink-500 pointer-events-none">S/</span>
+                                <input type="number" id="tarifa" value="60" min="0" step="0.5" inputmode="decimal"
+                                    class="input-field w-full pl-10 pr-4 py-3 bg-ink-50 border border-ink-200 rounded-lg text-lg font-semibold text-ink-900 transition-all">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-ink-700 mb-1.5" for="proyectos">Proyectos al mes</label>
+                            <div class="relative">
+                                <input type="number" id="proyectos" value="4" min="1" step="1" inputmode="numeric"
+                                    class="input-field w-full pl-4 pr-4 py-3 bg-ink-50 border border-ink-200 rounded-lg text-lg font-semibold text-ink-900 transition-all">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Costo de licencia -->
+                <div class="bg-navy-900 rounded-xl p-6">
+                    <p class="text-xs font-semibold uppercase tracking-widest text-gold-400 mb-2">Inversión — Licencia Única</p>
+                    <p class="text-4xl font-bold text-white mb-1">S/ 300</p>
+                    <p class="text-sm text-white/40 font-normal">Pago único. Sin suscripciones ni cargos adicionales.</p>
+                </div>
+
+                <!-- Botón calcular -->
+                <button type="button" onclick="calcularROI()"
+                    class="w-full bg-navy-600 hover:bg-navy-800 text-white font-semibold py-3.5 px-6 rounded-xl transition-colors duration-200 cursor-pointer text-sm uppercase tracking-widest flex justify-center items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    Recalcular
+                </button>
+
+                <!-- CTA WhatsApp -->
+                <a href="https://wa.me/51967138375?text=Hola!%20Deseo%20solicitar%20una%20demo%20o%20comprar%20la%20licencia%20de%20An%C3%A1lisis%20S%C3%ADsmico%20Helper%201%20Beta."
+                   target="_blank" rel="noopener noreferrer"
+                   class="wa-btn w-full flex justify-center items-center gap-3 bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold py-3.5 px-6 rounded-xl transition-colors duration-200 cursor-pointer text-sm">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                    <span>Adquirir Licencia / Solicitar Demo</span>
+                </a>
+                <p class="text-xs text-ink-400 text-center -mt-1 font-medium">Atención directa e inmediata vía WhatsApp</p>
+
+            </aside>
+
+            <!-- ─── Panel de Resultados ─── -->
+            <section class="lg:col-span-8 space-y-4">
+
+                <!-- Nivel 1: Por Proyecto -->
+                <div class="bg-white border border-ink-200 rounded-xl p-6">
+                    <p class="text-xs font-semibold uppercase tracking-widest text-ink-400 mb-5">Por Proyecto</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+                        <div class="metric-card bg-ink-50 border border-ink-200 rounded-lg p-5">
+                            <p class="text-xs font-semibold uppercase tracking-widest text-ink-400 mb-2">Tiempo con SismikPE</p>
+                            <p class="text-3xl font-bold text-ink-900" id="res-tiempo-app">20 – 30 min</p>
+                            <p class="text-xs text-ink-400 mt-2 leading-relaxed" id="res-tiempo-ahorro">Frente al tiempo manual de análisis e informe.</p>
+                        </div>
+
+                        <div class="metric-card bg-ink-50 border border-ink-200 rounded-lg p-5">
+                            <p class="text-xs font-semibold uppercase tracking-widest text-ink-400 mb-2">Ahorro Económico</p>
+                            <p class="text-3xl font-bold text-navy-600" id="res-dinero-proy">S/ 0.00</p>
+                            <p class="text-xs text-ink-400 mt-2 leading-relaxed">Rango estimado por diseño procesado.</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Nivel 2: Mensual -->
+                <div class="bg-white border border-ink-200 rounded-xl p-6">
+                    <p class="text-xs font-semibold uppercase tracking-widest text-ink-400 mb-5">Impacto Mensual</p>
+                    <div class="grid grid-cols-1 gap-5">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-widest text-ink-400 mb-1.5">Ahorro Financiero</p>
+                            <p class="text-3xl font-bold text-navy-600 leading-tight" id="res-dinero-mes">S/ 0.00</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 border-t border-ink-200 pt-5">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-widest text-ink-400 mb-1.5">Horas Liberadas</p>
+                                <p class="text-2xl sm:text-3xl font-bold text-ink-900 leading-none"><span id="res-horas-mes">0</span> <span class="text-base font-normal text-ink-400">h / mes</span></p>
+                            </div>
+
+                            <div class="stat-divider sm:border-t-0 sm:border-l sm:border-ink-200 sm:pl-5 sm:ml-0 sm:pt-0 sm:mt-0">
+                                <p class="text-xs font-semibold uppercase tracking-widest text-ink-400 mb-1.5">ROI Mensual</p>
+                                <p class="text-2xl sm:text-3xl font-bold text-navy-600 leading-none" id="res-roi">0%</p>
+                                <p class="text-xs text-ink-400 mt-1" id="res-payback">—</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nivel 3: Anual (tarjeta destacada) -->
+                <div class="bg-navy-900 rounded-xl p-6 md:p-8 relative overflow-hidden">
+                    <!-- Línea decorativa sutil -->
+                    <div class="absolute top-0 left-0 w-1 h-full bg-gold-500 rounded-l-xl"></div>
+
+                    <p class="text-xs font-semibold uppercase tracking-widest text-gold-400 mb-6 pl-2">Impacto Anual — Retorno Total</p>
+
+                    <div class="grid grid-cols-1 gap-6 pl-2">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-widest text-white/40 mb-2">Ahorro Financiero Total</p>
+                            <p class="text-3xl sm:text-4xl md:text-5xl font-bold text-gold-400 leading-tight" id="res-dinero-anual">S/ 0.00</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 border-t border-white/10 pt-6">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-widest text-white/40 mb-2">Horas Liberadas</p>
+                                <p class="text-3xl font-bold text-white leading-none"><span id="res-horas-anual">0</span></p>
+                                <p class="text-sm text-white/30 mt-1">horas / año</p>
+                            </div>
+
+                            <div class="stat-divider-dark sm:border-t-0 sm:border-l sm:border-white/10 sm:pl-6 sm:ml-0 sm:pt-0 sm:mt-0">
+                                <p class="text-xs font-semibold uppercase tracking-widest text-white/40 mb-2">ROI Anual</p>
+                                <p class="text-3xl font-bold text-white leading-none" id="res-roi-anual">0%</p>
+                                <p class="text-xs text-white/30 mt-1">sobre inversión única de S/ 300</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nota Técnica -->
+                <div class="border-l-2 border-ink-300 pl-4 py-1">
+                    <p class="text-xs font-semibold uppercase tracking-widest text-ink-500 mb-1">Nota técnica</p>
+                    <p class="text-xs text-ink-400 leading-relaxed">El aplicativo extrae rigideces, masas, derivas y centros de masa/rigidez directamente del archivo analizado en ETABS, pero no reemplaza el criterio profesional. Los rangos de tiempo incluyen la revisión manual de irregularidades críticas por parte del ingeniero.</p>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <!-- ═══════════════════════════════════════
+         FOOTER
+    ═══════════════════════════════════════ -->
+    <footer class="bg-navy-950 border-t border-white/5 py-8">
+        <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <img src="SismikPE.png" alt="SismikPE" class="h-6 object-contain opacity-30 grayscale" onerror="this.style.display='none'">
+            <p class="text-xs text-white/25 font-medium text-center">
+                &copy; 2026 SismikPE · Desarrollado en asociación con Yabar Ingenieros · Análisis ETABS
+            </p>
+        </div>
+    </footer>
+
+    <!-- ═══════════════════════════════════════
+         JAVASCRIPT
+    ═══════════════════════════════════════ -->
+    <script>
+        const SOFTWARE_COST = 300;
+
+        const refs = {
+            pisos:        document.getElementById('pisos'),
+            tarifa:       document.getElementById('tarifa'),
+            proyectos:    document.getElementById('proyectos'),
+            tiempoApp:    document.getElementById('res-tiempo-app'),
+            tiempoAhorro: document.getElementById('res-tiempo-ahorro'),
+            dineroProy:   document.getElementById('res-dinero-proy'),
+            dineroMes:    document.getElementById('res-dinero-mes'),
+            horasMes:     document.getElementById('res-horas-mes'),
+            roi:          document.getElementById('res-roi'),
+            payback:      document.getElementById('res-payback'),
+            dineroAnual:  document.getElementById('res-dinero-anual'),
+            horasAnual:   document.getElementById('res-horas-anual'),
+            roiAnual:     document.getElementById('res-roi-anual'),
+        };
+
+        function fmt(value) {
+            return new Intl.NumberFormat('es-PE', {
+                style: 'currency', currency: 'PEN',
+                minimumFractionDigits: 2, maximumFractionDigits: 2
+            }).format(value).replace('PEN', 'S/');
+        }
+
+        function fmtN(value, decimals = 0) {
+            return new Intl.NumberFormat('es-PE', { maximumFractionDigits: decimals }).format(value);
+        }
+
+        function calcularROI() {
+            const pisos     = Math.max(1, Number(refs.pisos.value)     || 1);
+            const tarifa    = Math.max(0, Number(refs.tarifa.value)    || 0);
+            const proyectos = Math.max(1, Number(refs.proyectos.value) || 1);
+
+            // Tiempos en minutos
+            const tMinApp = 8  + 1.2 * pisos;
+            const tMaxApp = 12 + 1.8 * pisos;
+            const tManualHoras = 1.1 * pisos; // Análisis sísmico + informe
+
+            // Ahorro por proyecto (horas)
+            const horasMinProy = Math.max(0.5, tManualHoras - (tMaxApp / 60));
+            const horasMaxProy = Math.max(0.5, tManualHoras - (tMinApp / 60));
+
+            // Ahorro por proyecto (dinero)
+            const dinMinProy = horasMinProy * tarifa;
+            const dinMaxProy = horasMaxProy * tarifa;
+
+            // Impacto mensual
+            const horasMesMin  = horasMinProy * proyectos;
+            const horasMesMax  = horasMaxProy * proyectos;
+            const dinMesMin    = dinMinProy * proyectos;
+            const dinMesMax    = dinMaxProy * proyectos;
+
+            // Impacto anual
+            const horasAnualMin = horasMesMin * 12;
+            const horasAnualMax = horasMesMax * 12;
+            const dinAnualMin   = dinMesMin * 12;
+            const dinAnualMax   = dinMesMax * 12;
+
+            // ROI
+            const roiMes  = (( (dinMesMin + dinMesMax) / 2 ) - SOFTWARE_COST) / SOFTWARE_COST * 100;
+            const roiAnual = (( (dinAnualMin + dinAnualMax) / 2 ) - SOFTWARE_COST) / SOFTWARE_COST * 100;
+
+            // Payback
+            const dinMesAvg = (dinMesMin + dinMesMax) / 2;
+            const paybackM = dinMesAvg > 0 ? SOFTWARE_COST / dinMesAvg : null;
+            const paybackText = paybackM === null ? '—'
+                : paybackM > 120 ? 'Más de 10 años'
+                : `Recuperación en ${fmtN(paybackM, 1)} ${paybackM <= 1 ? 'mes' : 'meses'}`;
+
+            // Render
+            refs.tiempoApp.textContent    = `${Math.round(tMinApp)} – ${Math.round(tMaxApp)} min`;
+            refs.tiempoAhorro.textContent = `Frente a ${Math.round(tManualHoras * 60)} min de trabajo manual.`;
+            refs.dineroProy.textContent   = `${fmt(dinMinProy)} – ${fmt(dinMaxProy)}`;
+
+            refs.dineroMes.textContent = `${fmt(dinMesMin)} – ${fmt(dinMesMax)}`;
+            refs.horasMes.textContent  = `${fmtN(horasMesMin)} – ${fmtN(horasMesMax)}`;
+            refs.roi.textContent       = `${fmtN(roiMes)}%`;
+            refs.payback.textContent   = paybackText;
+
+            refs.dineroAnual.textContent = `${fmt(dinAnualMin)} – ${fmt(dinAnualMax)}`;
+            refs.horasAnual.textContent  = `${fmtN(horasAnualMin)} – ${fmtN(horasAnualMax)}`;
+            refs.roiAnual.textContent    = `${fmtN(roiAnual)}%`;
+        }
+
+        // Actualización en tiempo real
+        [refs.pisos, refs.tarifa, refs.proyectos].forEach(el => {
+            el.addEventListener('input', calcularROI);
+        });
+
+        window.addEventListener('DOMContentLoaded', calcularROI);
+    </script>
+</body>
+</html>
