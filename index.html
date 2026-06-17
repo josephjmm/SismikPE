@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" style="scroll-behavior: smooth;">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SismikPE — Calculadora de ROI y Ahorro · ETABS</title>
+    <title>SISMIK — Automatización de Análisis Sísmico · ETABS</title>
     <meta name="description"
         content="Calcula el ahorro mensual y anual al automatizar la extracción de datos de ETABS con SismikPE. Cumplimiento RNE E.030 2026.">
+    <link rel="icon" type="image/png" href="icon.png">
     <!-- Google Fonts: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -43,6 +44,10 @@
                             500: '#64748B',
                             700: '#334155',
                             900: '#0F172A',
+                        },
+                        sismik: {
+                            red: '#C62828',
+                            redLight: '#E53935',
                         }
                     }
                 }
@@ -52,6 +57,8 @@
     <style>
         * {
             font-family: 'Plus Jakarta Sans', sans-serif;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
         }
 
         .stat-divider {
@@ -66,14 +73,12 @@
             padding-top: 1.25rem;
         }
 
-        /* Input focus state */
         .input-field:focus {
             outline: none;
             border-color: #1e3a8a;
             box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.12);
         }
 
-        /* Subtle card hover */
         .metric-card {
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
@@ -83,17 +88,26 @@
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
         }
 
-        /* WhatsApp button pulse */
+        .benefit-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .benefit-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.10);
+        }
+
+        .cta-link {
+            transition: transform 0.15s ease, opacity 0.15s ease;
+        }
+
+        .cta-link:hover {
+            transform: scale(1.02);
+        }
+
         @keyframes wa-pulse {
-
-            0%,
-            100% {
-                box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.3);
-            }
-
-            50% {
-                box-shadow: 0 0 0 8px rgba(37, 211, 102, 0);
-            }
+            0%, 100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.3); }
+            50% { box-shadow: 0 0 0 8px rgba(37, 211, 102, 0); }
         }
 
         .wa-btn {
@@ -103,6 +117,15 @@
         .wa-btn:hover {
             animation: none;
         }
+
+        @keyframes sismik-glow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(198, 40, 40, 0.2); }
+            50% { box-shadow: 0 0 20px 4px rgba(198, 40, 40, 0.1); }
+        }
+
+        .sismik-logo-glow {
+            animation: sismik-glow 3s ease-in-out infinite;
+        }
     </style>
 </head>
 
@@ -110,29 +133,72 @@
 
     <!-- Fixed Sidebar Logos -->
     <aside
-        class="fixed left-0 top-0 h-screen w-20 lg:w-32 bg-navy-950 border-r border-white/10 z-[100] flex flex-col items-center py-8 lg:py-10 shadow-2xl">
-        <img src="PNG.%20SF%20BLANCO.png" alt="Murillo Systems"
-            class="w-14 lg:w-24 object-contain transition-transform hover:scale-110 cursor-pointer">
+        class="fixed left-0 top-0 h-screen w-20 lg:w-32 bg-navy-950/95 backdrop-blur-xl border-r border-white/10 z-[100] flex flex-col items-center py-6 lg:py-8 shadow-[4px_0_24px_rgba(0,0,0,0.4)] overflow-y-auto">
 
-        <div class="flex flex-col items-center my-6 gap-2 opacity-50">
-            <div class="w-px h-8 bg-white/20"></div>
-            <span class="text-white text-xl font-light">×</span>
-            <div class="w-px h-8 bg-white/20"></div>
+        <!-- Logo SISMIK (Producto principal) -->
+        <div class="relative group cursor-pointer flex flex-col items-center mt-1">
+            <div class="absolute -inset-3 bg-gradient-to-tr from-sismik-red/20 via-gold-400/10 to-transparent rounded-2xl blur-md opacity-40 group-hover:opacity-100 transition duration-500"></div>
+            <div class="relative w-14 h-14 lg:w-20 lg:h-20 bg-white rounded-2xl flex items-center justify-center p-2 shadow-[0_0_20px_rgba(198,40,40,0.15)] group-hover:shadow-[0_0_30px_rgba(198,40,40,0.35)] transition-all duration-300 sismik-logo-glow border border-white/20 group-hover:border-sismik-red/40">
+                <img src="icon.png" alt="SISMIK"
+                    class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300">
+            </div>
+            <span class="mt-2 text-[8px] lg:text-[9px] font-bold tracking-widest text-sismik-red uppercase opacity-70 group-hover:opacity-100 transition-opacity duration-300">SISMIK</span>
         </div>
 
-        <img src="etabs.png" alt="ETABS"
-            class="w-12 lg:w-20 object-contain opacity-80 transition-transform hover:scale-110 cursor-pointer">
+        <!-- Conector -->
+        <div class="flex flex-col items-center my-4 lg:my-5 gap-2 opacity-60">
+            <div class="w-px h-6 bg-gradient-to-b from-transparent via-white/30 to-transparent"></div>
+            <div class="w-1 h-1 rounded-full bg-white/30"></div>
+            <div class="w-px h-6 bg-gradient-to-b from-transparent via-white/30 to-transparent"></div>
+        </div>
+
+        <!-- Logo Murillo Systems (Desarrollador) -->
+        <div class="relative group cursor-pointer flex flex-col items-center">
+            <div class="absolute -inset-3 bg-gradient-to-tr from-gold-500/15 via-gold-400/8 to-transparent rounded-2xl blur-md opacity-30 group-hover:opacity-80 transition duration-500"></div>
+            <div class="relative w-10 h-10 lg:w-14 lg:h-14 bg-gradient-to-b from-white/10 to-white/5 border border-white/15 rounded-xl flex items-center justify-center p-2 group-hover:border-gold-400/40 group-hover:shadow-[0_0_18px_rgba(212,180,131,0.18)] transition-all duration-300">
+                <img src="PNG.%20SF%20BLANCO.png" alt="Murillo Systems"
+                    class="w-full h-full object-contain filter drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)] group-hover:scale-105 transition-transform duration-300">
+            </div>
+            <span class="absolute -bottom-5 text-[7px] lg:text-[8px] font-bold tracking-widest text-gold-400/70 uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-300">Dev</span>
+        </div>
+
+        <!-- Conector -->
+        <div class="flex flex-col items-center my-4 lg:my-5 gap-2 opacity-50">
+            <div class="w-px h-5 bg-gradient-to-b from-transparent via-white/25 to-transparent"></div>
+            <div class="relative flex items-center justify-center w-5 h-5 rounded-full bg-white/5 border border-white/15 shadow-inner">
+                <svg class="w-2.5 h-2.5 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+            </div>
+            <div class="w-px h-5 bg-gradient-to-b from-transparent via-white/25 to-transparent"></div>
+        </div>
+
+        <!-- Logo ETABS -->
+        <div class="relative group cursor-pointer flex flex-col items-center">
+            <div class="absolute -inset-3 bg-blue-500/8 rounded-2xl blur-md opacity-0 group-hover:opacity-100 transition duration-500"></div>
+            <div class="relative w-10 h-10 lg:w-14 lg:h-14 flex items-center justify-center p-1.5 transition-all duration-300 group-hover:scale-105">
+                <img src="etabs.png" alt="ETABS"
+                    class="w-full h-full object-contain filter drop-shadow-[0_0_10px_rgba(59,130,246,0.25)]">
+            </div>
+            <span class="absolute -bottom-5 text-[7px] lg:text-[8px] font-bold tracking-widest text-blue-400/70 uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-300">ETABS</span>
+        </div>
 
         <div class="mt-auto flex" style="writing-mode: vertical-rl; transform: rotate(180deg);">
-            <span
-                class="text-white/30 text-xs lg:text-sm tracking-widest uppercase font-semibold flex items-center gap-3">
-                <svg class="w-3 h-3 lg:w-4 lg:h-4 text-gold-400 rotate-90" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clip-rule="evenodd"></path>
-                </svg>
-                RNE E.030 2026
-            </span>
+            <div class="relative group cursor-default">
+                <div class="absolute -inset-2 bg-gold-500/10 rounded-full blur opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <span
+                    class="relative text-white/35 group-hover:text-gold-400 transition-colors duration-300 text-[10px] lg:text-xs tracking-widest uppercase font-semibold flex items-center gap-2 py-2">
+                    <span class="relative flex h-2.5 w-2.5 lg:h-3.5 lg:w-3.5 rotate-90">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold-400 opacity-35"></span>
+                        <svg class="relative inline-flex w-2.5 h-2.5 lg:w-3.5 lg:h-3.5 text-gold-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                    </span>
+                    RNE E.030 2026
+                </span>
+            </div>
         </div>
     </aside>
 
@@ -141,48 +207,47 @@
     ═══════════════════════════════════════ -->
     <header class="bg-navy-900 text-white relative overflow-hidden">
 
-
         <!-- Hero text -->
         <div class="max-w-6xl mx-auto px-6 py-16 md:py-24 relative z-10">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
                     <div
-                        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gold-400/10 border border-gold-400/20 text-gold-400 text-xs font-bold uppercase tracking-widest mb-6">
-                        <span class="w-2 h-2 rounded-full bg-gold-400 animate-pulse"></span>
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-sismik-red/15 border border-sismik-red/30 text-sismik-redLight text-xs font-bold uppercase tracking-widest mb-6">
+                        <span class="w-2 h-2 rounded-full bg-sismik-redLight animate-pulse"></span>
                         Automatización Estructural
                     </div>
                     <h1
                         class="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-white mb-6 tracking-tight">
-                        SismikPE<br />
+                        SISMIK<br />
                         <span
                             class="text-3xl md:text-4xl lg:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-gold-300 to-gold-500 block mt-2">Automatiza
                             tu Análisis Sísmico.</span>
                     </h1>
-                    <p class="text-ink-300 text-lg md:text-xl font-normal leading-relaxed mb-8 max-w-xl">
+                    <p class="text-white/75 text-lg md:text-xl font-normal leading-relaxed mb-8 max-w-xl">
                         Software especializado para ingenieros. Extrae rigideces, masas, derivas y centros de rigidez
                         cumpliendo con la norma RNE E.030 2026 en minutos, sin copiar ni pegar.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4">
                         <a href="#cta-final"
-                            class="bg-gold-500 hover:bg-gold-400 text-navy-950 font-bold py-4 px-8 rounded-xl transition-all duration-200 text-center shadow-lg shadow-gold-500/20">
+                            class="cta-link bg-gold-500 hover:bg-gold-400 text-navy-950 font-bold py-4 px-8 rounded-xl transition-all duration-200 text-center shadow-lg shadow-gold-500/25">
                             Ver Licencia Vitalicia
                         </a>
                         <a href="#roi-calculator"
-                            class="bg-white/5 hover:bg-white/10 text-white border border-white/10 font-semibold py-4 px-8 rounded-xl transition-all duration-200 text-center">
+                            class="cta-link bg-white/8 hover:bg-white/15 text-white border border-white/15 font-semibold py-4 px-8 rounded-xl transition-all duration-200 text-center">
                             Calcula tu Ahorro
                         </a>
                     </div>
                 </div>
 
-                <!-- Mockup -->
+                <!-- Mockup con nuevo logo -->
                 <div class="relative">
                     <div
-                        class="absolute -inset-1 bg-gradient-to-r from-gold-500/30 to-navy-600/30 blur-2xl rounded-2xl">
+                        class="absolute -inset-1 bg-gradient-to-r from-sismik-red/25 via-gold-500/20 to-navy-600/20 blur-2xl rounded-2xl">
                     </div>
                     <div
-                        class="relative bg-navy-900/50 border border-white/10 rounded-2xl shadow-2xl overflow-hidden aspect-[4/3] flex items-center justify-center p-8 backdrop-blur-sm">
-                        <img src="SismikPE.png" alt="SismikPE Logo"
-                            class="max-w-full max-h-full object-contain drop-shadow-[0_0_40px_rgba(250,204,21,0.15)] transform hover:scale-105 transition-transform duration-500">
+                        class="relative bg-white/5 border border-white/10 rounded-2xl shadow-2xl overflow-hidden aspect-[4/3] flex items-center justify-center p-10 backdrop-blur-sm">
+                        <img src="icon.png" alt="SISMIK Logo"
+                            class="max-w-full max-h-full object-contain drop-shadow-[0_0_50px_rgba(198,40,40,0.20)] transform hover:scale-105 transition-transform duration-500">
                     </div>
                 </div>
             </div>
@@ -190,7 +255,10 @@
 
         <!-- Decoración de fondo -->
         <div
-            class="absolute top-0 right-0 -translate-y-12 translate-x-1/3 w-[800px] h-[800px] bg-navy-600/20 rounded-full blur-3xl pointer-events-none">
+            class="absolute top-0 right-0 -translate-y-12 translate-x-1/3 w-[800px] h-[800px] bg-navy-600/15 rounded-full blur-3xl pointer-events-none">
+        </div>
+        <div
+            class="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-sismik-red/5 rounded-full blur-3xl pointer-events-none">
         </div>
     </header>
 
@@ -208,7 +276,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- Problema -->
-                <div class="bg-white border border-red-100 rounded-2xl p-8 shadow-sm">
+                <div class="bg-white border-l-4 border-sismik-red border border-red-100 rounded-2xl p-8 shadow-md">
                     <div class="w-12 h-12 bg-red-50 text-red-500 rounded-xl flex items-center justify-center mb-6">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -219,19 +287,19 @@
                     <h3 class="text-xl font-bold text-ink-900 mb-3">La Forma Antigua (Manual)</h3>
                     <ul class="space-y-3">
                         <li class="flex items-start gap-3 text-ink-600">
-                            <span class="text-red-400 mt-1">✗</span> Copiar y pegar tablas de ETABS a Excel
+                            <span class="text-red-500 mt-1 font-bold">✗</span> Copiar y pegar tablas de ETABS a Excel
                             constantemente.
                         </li>
                         <li class="flex items-start gap-3 text-ink-600">
-                            <span class="text-red-400 mt-1">✗</span> Proceso que toma horas por cada iteración del
+                            <span class="text-red-500 mt-1 font-bold">✗</span> Proceso que toma horas por cada iteración del
                             modelo.
                         </li>
                         <li class="flex items-start gap-3 text-ink-600">
-                            <span class="text-red-400 mt-1">✗</span> Alto riesgo de errores humanos (un tipeo mal y
+                            <span class="text-red-500 mt-1 font-bold">✗</span> Alto riesgo de errores humanos (un tipeo mal y
                             falla el diseño).
                         </li>
                         <li class="flex items-start gap-3 text-ink-600">
-                            <span class="text-red-400 mt-1">✗</span> Pérdida de foco en lo importante: tu criterio
+                            <span class="text-red-500 mt-1 font-bold">✗</span> Pérdida de foco en lo importante: tu criterio
                             estructural.
                         </li>
                     </ul>
@@ -239,7 +307,7 @@
 
                 <!-- Solucion -->
                 <div
-                    class="bg-navy-900 border border-navy-800 rounded-2xl p-8 shadow-xl shadow-navy-900/10 relative overflow-hidden">
+                    class="bg-navy-900 border-l-4 border-gold-500 border border-navy-800 rounded-2xl p-8 shadow-xl shadow-navy-900/20 relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-gold-500/10 rounded-bl-full blur-2xl"></div>
                     <div
                         class="w-12 h-12 bg-gold-400/20 text-gold-400 rounded-xl flex items-center justify-center mb-6 relative z-10">
@@ -250,20 +318,20 @@
                     </div>
                     <h3 class="text-xl font-bold text-white mb-3 relative z-10">Con SismikPE</h3>
                     <ul class="space-y-3 relative z-10">
-                        <li class="flex items-start gap-3 text-white/70">
-                            <span class="text-gold-400 mt-1">✓</span> SismikPE lee tu modelo y extrae los datos
+                        <li class="flex items-start gap-3 text-white/75">
+                            <span class="text-gold-400 mt-1 font-bold">✓</span> SismikPE lee tu modelo y extrae los datos
                             automáticamente.
                         </li>
-                        <li class="flex items-start gap-3 text-white/70">
-                            <span class="text-gold-400 mt-1">✓</span> Obtén resultados validados y estructurados en
+                        <li class="flex items-start gap-3 text-white/75">
+                            <span class="text-gold-400 mt-1 font-bold">✓</span> Obtén resultados validados y estructurados en
                             minutos.
                         </li>
-                        <li class="flex items-start gap-3 text-white/70">
-                            <span class="text-gold-400 mt-1">✓</span> Precisión absoluta obteniendo datos del motor de
+                        <li class="flex items-start gap-3 text-white/75">
+                            <span class="text-gold-400 mt-1 font-bold">✓</span> Precisión absoluta obteniendo datos del motor de
                             cálculo.
                         </li>
-                        <li class="flex items-start gap-3 text-white/70">
-                            <span class="text-gold-400 mt-1">✓</span> Ahorras energía para dedicarte a optimizar la
+                        <li class="flex items-start gap-3 text-white/75">
+                            <span class="text-gold-400 mt-1 font-bold">✓</span> Ahorras energía para dedicarte a optimizar la
                             estructura.
                         </li>
                     </ul>
@@ -275,60 +343,60 @@
     <!-- ═══════════════════════════════════════
          BENEFICIOS
     ═══════════════════════════════════════ -->
-    <section class="py-20 bg-white border-y border-ink-100">
+    <section class="py-20 bg-white border-y-2 border-ink-100" style="border-top-color: #C62828; border-top-width: 4px;">
         <div class="max-w-6xl mx-auto px-6">
             <h2 class="text-2xl md:text-3xl font-bold text-ink-900 text-center mb-12">Desarrollado para Ingeniería
                 Estructural Moderna</h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <!-- B1 -->
-                <div>
-                    <div class="w-10 h-10 bg-navy-50 text-navy-600 rounded-lg flex items-center justify-center mb-4">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="benefit-card bg-white rounded-2xl p-6 border border-ink-100 shadow-sm">
+                    <div class="w-14 h-14 bg-navy-800 text-white rounded-xl flex items-center justify-center mb-5 shadow-md">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                         </svg>
                     </div>
-                    <h4 class="font-bold text-ink-900 mb-2">Procesamiento Rápido</h4>
+                    <h4 class="font-bold text-ink-900 mb-2 text-base">Procesamiento Rápido</h4>
                     <p class="text-sm text-ink-500 leading-relaxed">Extrae derivas, rigideces y fuerzas en una fracción
                         del tiempo manual.</p>
                 </div>
                 <!-- B2 -->
-                <div>
-                    <div class="w-10 h-10 bg-navy-50 text-navy-600 rounded-lg flex items-center justify-center mb-4">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="benefit-card bg-white rounded-2xl p-6 border border-ink-100 shadow-sm">
+                    <div class="w-14 h-14 bg-navy-800 text-white rounded-xl flex items-center justify-center mb-5 shadow-md">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
                             </path>
                         </svg>
                     </div>
-                    <h4 class="font-bold text-ink-900 mb-2">Norma RNE E.030 2026</h4>
+                    <h4 class="font-bold text-ink-900 mb-2 text-base">Norma RNE E.030 2026</h4>
                     <p class="text-sm text-ink-500 leading-relaxed">Implementación actualizada y estricta con la
                         normativa sísmica peruana vigente.</p>
                 </div>
                 <!-- B3 -->
-                <div>
-                    <div class="w-10 h-10 bg-navy-50 text-navy-600 rounded-lg flex items-center justify-center mb-4">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="benefit-card bg-white rounded-2xl p-6 border border-ink-100 shadow-sm">
+                    <div class="w-14 h-14 bg-navy-800 text-white rounded-xl flex items-center justify-center mb-5 shadow-md">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
                             </path>
                         </svg>
                     </div>
-                    <h4 class="font-bold text-ink-900 mb-2">Reportes Directos</h4>
+                    <h4 class="font-bold text-ink-900 mb-2 text-base">Reportes Directos</h4>
                     <p class="text-sm text-ink-500 leading-relaxed">Tablas ordenadas listas para adjuntar en tu memoria
                         de cálculo estructural.</p>
                 </div>
                 <!-- B4 -->
-                <div>
-                    <div class="w-10 h-10 bg-navy-50 text-navy-600 rounded-lg flex items-center justify-center mb-4">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="benefit-card bg-white rounded-2xl p-6 border border-ink-100 shadow-sm">
+                    <div class="w-14 h-14 bg-navy-800 text-white rounded-xl flex items-center justify-center mb-5 shadow-md">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
                             </path>
                         </svg>
                     </div>
-                    <h4 class="font-bold text-ink-900 mb-2">Licencia Vitalicia</h4>
+                    <h4 class="font-bold text-ink-900 mb-2 text-base">Licencia Vitalicia</h4>
                     <p class="text-sm text-ink-500 leading-relaxed">Sin suscripciones anuales ni costos ocultos. Paga
                         una vez, úsalo para siempre.</p>
                 </div>
@@ -339,7 +407,7 @@
     <!-- ═══════════════════════════════════════
          CALCULADORA DE ROI
     ═══════════════════════════════════════ -->
-    <section id="roi-calculator" class="py-20 bg-ink-50">
+    <section id="roi-calculator" class="py-20 bg-ink-50 border-t-4 border-sismik-red">
         <div class="max-w-6xl mx-auto px-6 mb-12 text-center">
             <h2 class="text-3xl md:text-4xl font-bold text-ink-900 mb-4">Calcula tu Retorno de Inversión (ROI)</h2>
             <p class="text-ink-500 text-lg max-w-2xl mx-auto">SismikPE no es un gasto, es una inversión que se paga
@@ -487,7 +555,6 @@
 
                     <!-- Nivel 3: Anual (tarjeta destacada) -->
                     <div class="bg-navy-900 rounded-xl p-6 md:p-8 relative overflow-hidden">
-                        <!-- Línea decorativa sutil -->
                         <div class="absolute top-0 left-0 w-1 h-full bg-gold-500 rounded-l-xl"></div>
 
                         <p class="text-xs font-semibold uppercase tracking-widest text-gold-400 mb-6 pl-2">Impacto Anual
@@ -538,18 +605,23 @@
     <!-- ═══════════════════════════════════════
          CTA FINAL
     ═══════════════════════════════════════ -->
-    <section id="cta-final" class="py-20 bg-white">
-        <div class="max-w-4xl mx-auto px-6 text-center">
-            <h2 class="text-3xl md:text-5xl font-bold text-ink-900 mb-6">¿Listo para optimizar tus proyectos?</h2>
-            <p class="text-ink-500 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
-                Adquiere SismikPE hoy por un pago único de <strong>S/ 300</strong>. Incluye licencia vitalicia, soporte
+    <section id="cta-final" class="py-20 bg-navy-900 relative overflow-hidden">
+        <!-- Decoración superior -->
+        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sismik-red via-gold-500 to-sismik-red"></div>
+        <div class="absolute top-0 right-0 w-96 h-96 bg-gold-500/5 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-64 h-64 bg-sismik-red/5 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-4xl mx-auto px-6 text-center relative z-10">
+            <h2 class="text-3xl md:text-5xl font-bold text-white mb-6">¿Listo para optimizar tus proyectos?</h2>
+            <p class="text-white/65 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
+                Adquiere SismikPE hoy por un pago único de <strong class="text-gold-400">S/ 300</strong>. Incluye licencia vitalicia, soporte
                 técnico y actualizaciones normativas.
             </p>
 
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <a href="https://wa.me/51967138375?text=Hola!%20Deseo%20comprar%20la%20licencia%20de%20SismikPE."
                     target="_blank" rel="noopener noreferrer"
-                    class="wa-btn w-full sm:w-auto flex justify-center items-center gap-3 bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold py-4 px-10 rounded-xl transition-colors duration-200 cursor-pointer text-lg shadow-lg shadow-[#25D366]/30">
+                    class="wa-btn cta-link w-full sm:w-auto flex justify-center items-center gap-3 bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold py-4 px-10 rounded-xl transition-colors duration-200 cursor-pointer text-lg shadow-lg shadow-[#25D366]/25">
                     <svg class="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                         <path
                             d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
@@ -559,11 +631,11 @@
 
                 <a href="https://wa.me/51967138375?text=Hola!%20Deseo%20solicitar%20una%20demo%20de%20SismikPE."
                     target="_blank" rel="noopener noreferrer"
-                    class="w-full sm:w-auto bg-white border border-ink-200 hover:bg-ink-50 text-ink-700 font-bold py-4 px-8 rounded-xl transition-colors duration-200 text-center text-lg shadow-sm">
+                    class="cta-link w-full sm:w-auto bg-white/8 border border-white/20 hover:bg-white/15 text-white font-bold py-4 px-8 rounded-xl transition-colors duration-200 text-center text-lg">
                     Solicitar Demo Gratis
                 </a>
             </div>
-            <p class="text-sm text-ink-400 mt-6">Atención directa e inmediata. Compra 100% segura.</p>
+            <p class="text-sm text-white/35 mt-6">Atención directa e inmediata. Compra 100% segura.</p>
         </div>
     </section>
 
@@ -572,10 +644,10 @@
     ═══════════════════════════════════════ -->
     <footer class="bg-navy-950 border-t border-white/5 py-8">
         <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-            <img src="PNG.%20SF%20BLANCO.png" alt="Murillo Systems" class="h-8 object-contain opacity-50 grayscale"
+            <img src="icon.png" alt="SISMIK" class="h-10 object-contain opacity-75"
                 onerror="this.style.display='none'">
             <p class="text-xs text-white/25 font-medium text-center">
-                &copy; 2026 SismikPE · Desarrollado por Murillo Systems · Análisis ETABS
+                &copy; 2026 SISMIK · Desarrollado por Murillo Systems · Análisis ETABS
             </p>
         </div>
     </footer>
@@ -621,7 +693,7 @@
             // Tiempos en minutos
             const tMinApp = 8 + 1.2 * pisos;
             const tMaxApp = 12 + 1.8 * pisos;
-            const tManualHoras = 1.1 * pisos; // Análisis sísmico + informe
+            const tManualHoras = 1.1 * pisos;
 
             // Ahorro por proyecto (horas)
             const horasMinProy = Math.max(0.5, tManualHoras - (tMaxApp / 60));
@@ -679,3 +751,4 @@
 </body>
 
 </html>
+
